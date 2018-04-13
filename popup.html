@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Zero Width Transcoder</title>
+    <script src="popup.js"></script>
+    <link rel="stylesheet" href="popup.css">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+  </head>
+  <body>
+    <div class="textTitle">Zero Width Transcoder</div>
+    <div class="cellRow"><hr /></div>
+    <div>
+      <label for="txtInputText" class="text">Input Text</label><br />
+      <input type="text" id="txtInputText" class="inputElement" value="abcdefghijklmnop" />
+      <button id="cmdDecodeText">Decode</button><br />
+    </div>
+    <div class="cellRow"><hr /></div>
+    <div>
+      <label for="txtSecretText" class="text">Secret Text</label><br />
+      <input type="text" id="txtSecretText" class="inputElement" />
+      <button id="cmdEncodeText">Encode</button><br />
+    </div>
+    <div class="cellRow"><hr /></div>
+    <div>
+      <label for="txtOutputText" class="text">Result</label><br />
+      <!-- <input type="text" id="txtOutputText" class="inputElement" readonly="true" /> -->
+      <input type="text" id="txtOutputText" class="inputElement" />
+      <div class="codeOut errorFont" id="errorMsg">Erroar</div>
+      <button id="cmdHowToUse">How To Use</button><br />
+    </div>
+    <div id="howToUse">
+        <div class="cellRow"><hr /></div>
+        <span class="textTitle">Encoding</span><br />
+        <span class="text">Place the text you want to hide the message in into the Input field, then place the text you want to hide into the Secret field, and click Encode.</span><br />
+        <span class="text">The original text should appear in the output field, but it will have the secret text hidden inside it.</span><br />
+        <div class="cellRow"><hr /></div>
+        <span class="textTitle">Decoding</span><br />
+        <span class="text">Place text that has the hidden text inside it (for example, copy, then paste the text from the result field from the encoding step) into the Input field.</span><br />
+        <span class="text">Click on the Decode button, and a copy of the hidden text will appear in the Result field.</span><br />
+        <br />
+    </div>
+    <br />
+  </body>
+</html>

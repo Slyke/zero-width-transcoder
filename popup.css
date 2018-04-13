@@ -1,0 +1,99 @@
+html {
+  border-left-style: solid;
+  border-left-color: #ffffff;
+  border-left-width: 2px;
+  border-right-style: solid;
+  border-right-color: #FFFFFF;
+  border-right-width: 2px;
+}
+
+body {
+  width: 525px;
+  background-color: #000000;
+  font-size: 16px;
+}
+
+.text {
+  color: #6FC3DF;
+}
+
+.textTitle {
+  color: #FFE64D;
+  cursor: default;
+  font-size: 24px;
+  text-align: center;
+  width: 100%;
+}
+
+.codeOut {
+  color: #FF4D4D;
+  word-wrap: break-word;
+  font-family: monospace;
+  border-color: #E6FFFF;
+  border-style: solid;
+  border-radius: 3px;
+  border-width: 1px;
+  padding: 3px;
+  margin-left: 5%;
+  width: 80%;
+}
+
+.inputElement {
+  background-color: #0C141F;
+  margin-left: 5%;
+  color: #DF740C;
+  border-color: #E6FFFF;
+  border-style: solid;
+  border-radius: 3px;
+  border-width: 1px;
+  font-size: 24px;
+}
+
+.inputElement:focus {
+  color: #FFE64D !important;
+  border-width: 3px !important;
+}
+
+.inputElement[type=text] {
+  width: 80%;
+  padding: 3px;
+}
+
+hr {
+  color: #E6FFFF;
+}
+
+.cellRow {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+a {
+  margin-left: 5%;
+  color: #DF740C;
+  font-size: 24px;
+}
+
+button {
+  width: 125px;
+  background-color: #0C141F;
+  border-color: #E6FFFF;
+  border-style: solid;
+  border-radius: 3px;
+  border-width: 1px;
+  font-size: 16px;
+  color: #6FC3DF;
+  padding: 5px;
+  margin: 5px;
+  margin: 10px;
+  margin-left: 5%;
+}
+
+button :focus :active :click {
+  background-color: #6FC3DF;
+  color: #DF740C;
+}
+
+.errorFont {
+  color: #DF740C;
+}
