@@ -7,15 +7,15 @@ var lblErrorMessage;
 var cmdEncodeData;
 var cmdDecodeData;
 
-// var uFEFF = '\uFEFF'; // u65279
-// var u200B = '\u200B'; // u8203
-// var u200C = '\u200C'; // u8204
-// var u200D = '\u200D'; // u8205
+var uFEFF = '\uFEFF'; // u65279
+var u200B = '\u200B'; // u8203
+var u200C = '\u200C'; // u8204
+var u200D = '\u200D'; // u8205
 
-var uFEFF = '!'; // u65279
-var u200B = '1'; // u8203
-var u200C = '0'; // u8204
-var u200D = '@'; // u8205
+// var uFEFF = '!'; // u65279
+// var u200B = '1'; // u8203
+// var u200C = '0'; // u8204
+// var u200D = '@'; // u8205
 
 var toggle = function(divBlock) {
   divBlock.style.display = divBlock.style.display === "none" ? "block" : "none";
@@ -156,22 +156,16 @@ var interlaceLetters = function(baseString, interweaveStringArray) {
 
     var every = interweaveStringArray.length / useableBase.length;
     console.log("every", every);
+    console.log("useableBase.length", useableBase.length);
     for (var i = 0; i < useableBase.length; i++) {
-      interweaveStringArray.slice(i * every, every + 1).map((intWArr) => {
+      console.log("i", i);
+      interweaveStringArray.slice(i * every, ((i * every) + every)).map((intWArr) => {
+        console.log("intWArr", intWArr);
         result.push(intWArr);
       });
       result.push(useableBase[i]);
+      console.log("useableBase[i]", useableBase[i]);
     }
-    // for (var i = 0, len = interweaveStringArray.length, interW = 0; i < len; i += every, interW++) {
-    //   console.log("interweaveStringArray", interweaveStringArray);
-    //   interweaveStringArray.slice(i, every).map((intWArr) => {
-    //     result.push(intWArr);
-    //   });
-    //   console.log("result1", result);
-    //   result.push(useableBase[interW]);
-    //   console.log("useableBase[interW]", useableBase[interW]);
-    //   console.log("result2", result);
-    // }
   }
 
   result.push(firstLast[1]);
