@@ -7,10 +7,15 @@ var lblErrorMessage;
 var cmdEncodeData;
 var cmdDecodeData;
 
-var uFEFF = '\uFEFF'; // u65279
-var u200B = '\u200B'; // u8203
-var u200C = '\u200C'; // u8204
-var u200D = '\u200D'; // u8205
+// var uFEFF = '\uFEFF'; // u65279
+// var u200B = '\u200B'; // u8203
+// var u200C = '\u200C'; // u8204
+// var u200D = '\u200D'; // u8205
+
+var uFEFF = '!'; // u65279
+var u200B = '1'; // u8203
+var u200C = '0'; // u8204
+var u200D = '@'; // u8205
 
 var toggle = function(divBlock) {
   divBlock.style.display = divBlock.style.display === "none" ? "block" : "none";
@@ -55,15 +60,25 @@ var setupUIHooks = function() {
     txtOutputText.value = encodeText(txtInputText.value, txtSecretText.value);
   });
 
+  cmdDecodeData.addEventListener('click', function() {
+    txtOutputText.value = decodeText(txtInputText.value);
+  });
+
   txtInputText.addEventListener("change", clearResultAndError);
   txtSecretText.addEventListener("change", clearResultAndError);
 };
+
+var decodeText = function(inputText) {
+  var binaryText = zeroWidthToBinary(inputText);
+  var result = binaryToText(binaryText);
+
+  return result;
+}
 
 var encodeText = function(inputText, hiddenText) {
   var encodedHiddenText = "";
 
   var secretText = textToBinary(hiddenText);
-  var encodedHiddenText = "";
 
   if (inputText.length > 2) {
     encodedHiddenText = binaryToZeroWidth(secretText);
@@ -71,13 +86,7 @@ var encodeText = function(inputText, hiddenText) {
     showError("Error: Input text is not long enough to interweave");
   }
 
-  // var
-
-  var result = interlaceLetters(inputText, hiddenText, interweaveTransformFunction);
-
-  // if (true) {
-  //   var 
-  // }
+  var result = interlaceLetters(inputText, encodedHiddenText);
 
   return result;
 }
@@ -92,71 +101,83 @@ var zeroPad = function(num) {
   return '00000000'.slice(String(num).length) + num;
 };
 
-var binaryToText = function(inputString){
-  return inputString.split(' ').map(num => String.fromCharCode(parseInt(num, 2))).join('');
+var binaryToText = function(inputString) {
+  return inputString.split(' ').map(num => (num.length > 6 ? String.fromCharCode(parseInt(num, 2)) : '')).join('');
 };
 
-var textToBinary = function(inputString){
-  return inputString.split('').map(char => zeroPad(char.charCodeAt(0).toString(2))).join(' ');
+var textToBinary = function(inputString) {
+  return inputString.split('').map(char => zeroPad(char.charCodeAt(0).toString(2)));
 };
 
 var zeroWidthToBinary = function(inputString) {
-  return inputString.split(u65279).map((char) => { // invisible &#65279; '﻿'
-    if (char === u200B) { // invisible &#8203; '​'
-      return '1';
-    } else if (char === u200C) { // invisible &#8204; '‌'
-      return '0';
-    }
-    return ' ';
-  }).join('');
+  return inputString.split(u200D).map((charChunkPre) => { // invisible &#65279; '﻿'
+    var charChunk = charChunkPre.split(uFEFF)[0];
+    return charChunk.split('').map((char) => {
+      if (char === u200B) { // invisible &#8203; '​'
+        return '1';
+      } else if (char === u200C) { // invisible &#8204; '‌'
+        return '0';
+      } else {
+        return '';
+      }
+    }).join('');
+  }).join(' ');
 }
 
 var binaryToZeroWidth = function(binaryTextArray) {
-  return binaryTextArray.split('').map((binaryNum) => {
-    var num = parseInt(binaryNum, 10);
-    if (num === 1) {
-      return u200B; // invisible &#8203;
-    } else if (num === 0) {
-      return u200C; // invisible &#8204;
-    }
-    return u200D; // invisible &#8205; '‍'
-  }).join(uFEFF); // invisible &#65279;
+  return binaryTextArray.map((binaryChar) => {
+    var binaryTextResult = binaryChar.split('').map((binaryNum) => {
+      var num = parseInt(binaryNum, 10);
+      if (num === 1) {
+        return u200B; // invisible &#8203;
+      } else if (num === 0) {
+        return u200C; // invisible &#8204;
+      }
+      return '';
+    }).join('');
+    return u200D + binaryTextResult + uFEFF;
+  });
 };
 
-var binaryCharToZeroWidth = function(inputChar) {
-  var num = parseInt(inputChar, 10);
-  var res;
+var interlaceLetters = function(baseString, interweaveStringArray) {
 
-  if (num === 1) {
-    res = u200B; // invisible &#8203;
-  } else if (num === 0) {
-    res = u200C; // invisible &#8204;
+  var firstLast = [baseString[0], baseString[baseString.length - 1]];
+  var useableBase = baseString.substring(1, baseString.length - 1);
+  console.log("useableBase", useableBase);
+  var result = [];
+
+  if (interweaveStringArray.length < useableBase.length) {
+    var every = useableBase.length / interweaveStringArray.length;
+    for (var i = 0, len = useableBase.length, interW = 0; i < len; i += every, interW++) {
+      result.push(useableBase.substr(i, every));
+      result.push(interweaveStringArray[interW]);
+    }
   } else {
-    res = u200D; // invisible &#8205; '‍'
+
+    var every = interweaveStringArray.length / useableBase.length;
+    console.log("every", every);
+    for (var i = 0; i < useableBase.length; i++) {
+      interweaveStringArray.slice(i * every, every + 1).map((intWArr) => {
+        result.push(intWArr);
+      });
+      result.push(useableBase[i]);
+    }
+    // for (var i = 0, len = interweaveStringArray.length, interW = 0; i < len; i += every, interW++) {
+    //   console.log("interweaveStringArray", interweaveStringArray);
+    //   interweaveStringArray.slice(i, every).map((intWArr) => {
+    //     result.push(intWArr);
+    //   });
+    //   console.log("result1", result);
+    //   result.push(useableBase[interW]);
+    //   console.log("useableBase[interW]", useableBase[interW]);
+    //   console.log("result2", result);
+    // }
   }
 
-  res += uFEFF; // invisible &#65279;
-  return res;
-}
+  result.push(firstLast[1]);
+  result.unshift(firstLast[0]);
 
-var interweaveTransformFunction = function(inputString) {
-  console.log(inputString, textToBinary(inputString));
-  return binaryToZeroWidth(textToBinary(inputString));
-}
-
-var interlaceLetters = function(baseString, interweaveString, interweaveTransformFunction) {
-  var i;
-  // var trimmed = baseString.substring(1, baseString.length - 1);
-  var trimmed = baseString;
-  var l = Math.min(trimmed.length, interweaveString.length);
-  var temp = '';
-
-  for (i = 0; i < l; i++) {
-    temp += trimmed[i] + interweaveTransformFunction(interweaveString[i]);
-  }
-
-  return temp + trimmed.slice(i) + interweaveTransformFunction(interweaveString.slice(i));
-  // return baseString[0] + temp + trimmed.slice(i) + interweaveTransformFunction(interweaveString.slice(i)) + baseString[baseString.length - 1];
+  return result.join('');
 }
 
 var showError = function(errorMessage) {
