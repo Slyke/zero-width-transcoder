@@ -1,11 +1,14 @@
+var mainDoc;
 var cmdHowToUse;
 var divHowToUse;
+var options;
 var txtInputText;
 var txtSecretText;
 var txtOutputText;
 var lblErrorMessage;
 var cmdEncodeData;
 var cmdDecodeData;
+var cmdExpandCollapse;
 
 var uFEFF = '\uFEFF'; // u65279
 var u200B = '\u200B'; // u8203
@@ -19,7 +22,17 @@ var u200D = '\u200D'; // u8205
 
 var toggle = function(divBlock) {
   divBlock.style.display = divBlock.style.display === "none" ? "block" : "none";
-  window.scroll(0, document.body.scrollHeight);
+  try {
+    window.scroll({ top: document.body.scrollHeight, left: 0, behavior: 'smooth' });
+  } catch (e) {
+      let before = window.pageYOffset;
+
+      window.scrollTo(0, window.innerHeight);
+      
+      if (before === window.pageYOffset) {
+          console.warn("Your browser doesn't seem to support scrolling.");
+      }
+  }
 }
 
 var pasteSelection = function(textBox) {
@@ -28,8 +41,11 @@ var pasteSelection = function(textBox) {
     chrome.tabs.sendMessage(tab[0].id, {method: "getSelection"}, 
     function(response) {
       try {
-        textBox.innerHTML = response.data;
+        if (response.data) {
+          textBox.innerHTML = response.data;
+        }
       } catch (e) {
+        console.error('Error getting text from tab: ', e)
         // NOP
       }
     });
@@ -43,17 +59,58 @@ var clearResultAndError = function() {
 }
 
 var setupUIHooks = function() {
+  mainDoc = document.getElementById("mainDoc");
   cmdHowToUse = document.getElementById("cmdHowToUse");
   divHowToUse = document.getElementById("howToUse");
+  options = document.getElementById("options");
   txtInputText = document.getElementById("txtInputText");
   txtSecretText = document.getElementById("txtSecretText");
   txtOutputText = document.getElementById("txtOutputText");
   lblErrorMessage = document.getElementById("errorMsg");
   cmdEncodeData = document.getElementById("cmdEncodeText");
   cmdDecodeData = document.getElementById("cmdDecodeText");
+  cmdExpandCollapse = document.getElementById("cmdExpandCollapse");
+  cmdOptions = document.getElementById("cmdOptions");
 
   cmdHowToUse.addEventListener('click', function() {
+    if (divHowToUse.style.display === "block") {
+      cmdHowToUse.innerHTML = "How To Use \u25BC";
+    } else {
+      cmdHowToUse.innerHTML = "How To Use \u25B2";
+    }
+
+    if (options.style.display === "block") {
+      cmdOptions.click();
+    }
+    
     toggle(divHowToUse);
+  });
+
+  // cmdOptions.addEventListener('click', function() {
+  //   if (options.style.display === "block") {
+  //     cmdOptions.innerHTML = "Options \u25BC";
+  //   } else {
+  //     cmdOptions.innerHTML = "Options \u25B2";
+  //   }
+
+  //   if (divHowToUse.style.display === "block") {
+  //     cmdHowToUse.click();
+  //   }
+    
+  //   toggle(options);
+  // });
+
+  cmdExpandCollapse.addEventListener('click', function() {
+    var currentWidth = document.body.style.width || document.body.clientWidth;
+    currentWidth = currentWidth.toString().replace('px', '');
+
+    if (currentWidth > 525) {
+      cmdExpandCollapse.innerHTML = "Expand \u25BA";
+      mainDoc.style.width = '512px';
+    } else {
+      cmdExpandCollapse.innerHTML = "Collapse \u25C4";
+      mainDoc.style.width = '768px';
+    }
   });
 
   cmdEncodeData.addEventListener('click', function() {
@@ -83,7 +140,7 @@ var encodeText = function(inputText, hiddenText) {
   if (inputText.length > 2) {
     encodedHiddenText = binaryToZeroWidth(secretText);
   } else {
-    showError("Error: Input text is not long enough to interweave");
+    showError("Error: Input Text is not long enough to interweave");
   }
 
   var result = interlaceLetters(inputText, encodedHiddenText);
@@ -95,6 +152,7 @@ var setupUI = function() {
   pasteSelection(txtInputText);
   divHowToUse.style.display = "none";
   lblErrorMessage.style.display = "none";
+  options.style.display = "none";
 };
 
 var zeroPad = function(num) {
@@ -143,7 +201,6 @@ var interlaceLetters = function(baseString, interweaveStringArray) {
 
   var firstLast = [baseString[0], baseString[baseString.length - 1]];
   var useableBase = baseString.substring(1, baseString.length - 1);
-  console.log("useableBase", useableBase);
   var result = [];
 
   if (interweaveStringArray.length < useableBase.length) {
@@ -155,16 +212,11 @@ var interlaceLetters = function(baseString, interweaveStringArray) {
   } else {
 
     var every = interweaveStringArray.length / useableBase.length;
-    console.log("every", every);
-    console.log("useableBase.length", useableBase.length);
     for (var i = 0; i < useableBase.length; i++) {
-      console.log("i", i);
       interweaveStringArray.slice(i * every, ((i * every) + every)).map((intWArr) => {
-        console.log("intWArr", intWArr);
         result.push(intWArr);
       });
       result.push(useableBase[i]);
-      console.log("useableBase[i]", useableBase[i]);
     }
   }
 
@@ -185,21 +237,3 @@ document.addEventListener('DOMContentLoaded', function() {
   setupUIHooks();
   setupUI();
 }, false);
-
-
-
-
-
-// $(function(){
-//   $('#paste').click(function(){pasteSelection();});
-// });
-// function pasteSelection() {
-//   chrome.tabs.query({active:true, windowId: chrome.windows.WINDOW_ID_CURRENT}, 
-//   function(tab) {
-//     chrome.tabs.sendMessage(tab[0].id, {method: "getSelection"}, 
-//     function(response){
-//       var text = document.getElementById('text'); 
-//       text.innerHTML = response.data;
-//     });
-//   });
-// }

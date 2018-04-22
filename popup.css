@@ -5,10 +5,11 @@ html {
   border-right-style: solid;
   border-right-color: #FFFFFF;
   border-right-width: 2px;
+  width: 525px;
 }
 
 body {
-  width: 525px;
+  width: 100%;
   background-color: #000000;
   font-size: 16px;
 }
@@ -90,10 +91,57 @@ button {
 }
 
 button :focus :active :click {
-  background-color: #6FC3DF;
+  background-color: #0C141F;
   color: #DF740C;
+}
+
+button:hover {
+  background-color: #3C444F;
+  color: #51CB51;
 }
 
 .errorFont {
   color: #DF740C;
+}
+
+.rightPadding {
+  padding-right: 5%;
+}
+
+.controlButtons {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+}
+
+input[type=text] {
+  -webkit-transition: all 0.30s ease-in-out;
+  -moz-transition: all 0.30s ease-in-out;
+  -ms-transition: all 0.30s ease-in-out;
+  -o-transition: all 0.30s ease-in-out;
+  outline: none;
+  border: 1px solid #DDDDDD;
+}
+
+inputElement:focus, .inputElement:hover {
+  box-shadow: 0 0 5px #51cbee;
+  border: 1px solid #51cbee;
+  background-color: #2C343F;
+}
+
+.readOnly:hover {
+  box-shadow: 0 0 5px #51CB51;
+  border: 1px solid #51CB51;
+}
+
+
+.readOnly {
+  background-color: #0C141F;
+  margin-left: 5%;
+  color: #DF740C;
+  border-color: #51CB51;
+  border-style: solid;
+  border-radius: 3px;
+  border-width: 1px;
+  font-size: 24px;
 }

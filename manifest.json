@@ -11,6 +11,7 @@
   },
    "permissions": [
     "tabs",
+    "activeTab",
     "<all_urls>"
   ],
   "content_scripts": [
