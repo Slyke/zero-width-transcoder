@@ -9,7 +9,7 @@ var lblErrorMessage;
 var cmdEncodeData;
 var cmdDecodeData;
 var cmdExpandCollapse;
-var chkInterweaveBetweenLetters;
+var chkHTMLEntitiesEncoding;
 
 var uFEFF = '\uFEFF'; // u65279
 var u200B = '\u200B'; // u8203
@@ -98,7 +98,7 @@ var setupUIHooks = function() {
   cmdDecodeData = document.getElementById("cmdDecodeText");
   cmdExpandCollapse = document.getElementById("cmdExpandCollapse");
   cmdOptions = document.getElementById("cmdOptions");
-  chkInterweaveBetweenLetters = document.getElementById("chkInterweaveBetweenLetters");
+  chkHTMLEntitiesEncoding = document.getElementById("chkHTMLEntitiesEncoding");
 
   cmdHowToUse.addEventListener('click', function() {
     if (divHowToUse.style.display === "block") {
@@ -151,9 +151,9 @@ var setupUIHooks = function() {
     txtOutputText.value = decodeText(txtInputText.value);
   });
 
-  chkInterweaveBetweenLetters.addEventListener('click', function() {
+  chkHTMLEntitiesEncoding.addEventListener('click', function() {
     if (typeof(Storage) !== "undefined") {
-      localStorage.setItem("chkInterweaveBetweenLetters", chkInterweaveBetweenLetters.checked)
+      localStorage.setItem("chkHTMLEntitiesEncoding", chkHTMLEntitiesEncoding.checked)
     }
     console.log();
   });
@@ -162,7 +162,7 @@ var setupUIHooks = function() {
   txtSecretText.addEventListener("change", clearResultAndError);
   
   if (typeof(Storage) !== "undefined") {
-    chkInterweaveBetweenLetters.checked = (localStorage.getItem("chkInterweaveBetweenLetters") === "true");
+    chkHTMLEntitiesEncoding.checked = (localStorage.getItem("chkHTMLEntitiesEncoding") === "true");
 
     if (localStorage.getItem("mainBodyExpanded") === "true") {
       cmdExpandCollapse.click();
@@ -180,7 +180,7 @@ var decodeText = function(inputText) {
 var encodeText = function(inputText, hiddenText) {
   var encodedHiddenText = "";
 
-  setEncodingCharacters(true);
+  setEncodingCharacters(localStorage.getItem("chkHTMLEntitiesEncoding") === "true");
 
   var secretText = textToBinary(hiddenText);
 
