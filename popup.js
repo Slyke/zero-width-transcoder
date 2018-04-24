@@ -9,16 +9,43 @@ var lblErrorMessage;
 var cmdEncodeData;
 var cmdDecodeData;
 var cmdExpandCollapse;
+var chkInterweaveBetweenLetters;
 
 var uFEFF = '\uFEFF'; // u65279
 var u200B = '\u200B'; // u8203
 var u200C = '\u200C'; // u8204
 var u200D = '\u200D'; // u8205
 
+var htmluFEFF = "&#xfeff;";
+var htmlu200B = "&#x200b;";
+var htmlu200C = "&#x200c;";
+var htmlu200D = "&#x200d;";
+
+var binary0;
+var binary1;
+var encodeStart;
+var encodeEnd;
+
+// Debug
 // var uFEFF = '!'; // u65279
 // var u200B = '1'; // u8203
 // var u200C = '0'; // u8204
 // var u200D = '@'; // u8205
+
+var setEncodingCharacters = function(htmlEntities) {
+  if (htmlEntities) {
+    binary0 = htmlu200C;
+    binary1 = htmlu200B;
+    encodeStart = htmlu200D;
+    encodeEnd = htmluFEFF;
+  } else {
+    binary0 = u200C;
+    binary1 = u200B;
+    encodeStart = u200D;
+    encodeEnd = uFEFF;
+  }
+
+}
 
 var toggle = function(divBlock) {
   divBlock.style.display = divBlock.style.display === "none" ? "block" : "none";
@@ -71,6 +98,7 @@ var setupUIHooks = function() {
   cmdDecodeData = document.getElementById("cmdDecodeText");
   cmdExpandCollapse = document.getElementById("cmdExpandCollapse");
   cmdOptions = document.getElementById("cmdOptions");
+  chkInterweaveBetweenLetters = document.getElementById("chkInterweaveBetweenLetters");
 
   cmdHowToUse.addEventListener('click', function() {
     if (divHowToUse.style.display === "block") {
@@ -86,19 +114,19 @@ var setupUIHooks = function() {
     toggle(divHowToUse);
   });
 
-  // cmdOptions.addEventListener('click', function() {
-  //   if (options.style.display === "block") {
-  //     cmdOptions.innerHTML = "Options \u25BC";
-  //   } else {
-  //     cmdOptions.innerHTML = "Options \u25B2";
-  //   }
+  cmdOptions.addEventListener('click', function() {
+    if (options.style.display === "block") {
+      cmdOptions.innerHTML = "Options \u25BC";
+    } else {
+      cmdOptions.innerHTML = "Options \u25B2";
+    }
 
-  //   if (divHowToUse.style.display === "block") {
-  //     cmdHowToUse.click();
-  //   }
+    if (divHowToUse.style.display === "block") {
+      cmdHowToUse.click();
+    }
     
-  //   toggle(options);
-  // });
+    toggle(options);
+  });
 
   cmdExpandCollapse.addEventListener('click', function() {
     var currentWidth = document.body.style.width || document.body.clientWidth;
@@ -107,9 +135,11 @@ var setupUIHooks = function() {
     if (currentWidth > 525) {
       cmdExpandCollapse.innerHTML = "Expand \u25BA";
       mainDoc.style.width = '512px';
+      localStorage.setItem("mainBodyExpanded", false);
     } else {
       cmdExpandCollapse.innerHTML = "Collapse \u25C4";
       mainDoc.style.width = '768px';
+      localStorage.setItem("mainBodyExpanded", true);
     }
   });
 
@@ -121,8 +151,23 @@ var setupUIHooks = function() {
     txtOutputText.value = decodeText(txtInputText.value);
   });
 
+  chkInterweaveBetweenLetters.addEventListener('click', function() {
+    if (typeof(Storage) !== "undefined") {
+      localStorage.setItem("chkInterweaveBetweenLetters", chkInterweaveBetweenLetters.checked)
+    }
+    console.log();
+  });
+
   txtInputText.addEventListener("change", clearResultAndError);
   txtSecretText.addEventListener("change", clearResultAndError);
+  
+  if (typeof(Storage) !== "undefined") {
+    chkInterweaveBetweenLetters.checked = (localStorage.getItem("chkInterweaveBetweenLetters") === "true");
+
+    if (localStorage.getItem("mainBodyExpanded") === "true") {
+      cmdExpandCollapse.click();
+    }
+  }
 };
 
 var decodeText = function(inputText) {
@@ -134,6 +179,8 @@ var decodeText = function(inputText) {
 
 var encodeText = function(inputText, hiddenText) {
   var encodedHiddenText = "";
+
+  setEncodingCharacters(true);
 
   var secretText = textToBinary(hiddenText);
 
@@ -168,12 +215,12 @@ var textToBinary = function(inputString) {
 };
 
 var zeroWidthToBinary = function(inputString) {
-  return inputString.split(u200D).map((charChunkPre) => { // invisible &#65279; '﻿'
-    var charChunk = charChunkPre.split(uFEFF)[0];
+  return inputString.split(encodeStart).map((charChunkPre) => {
+    var charChunk = charChunkPre.split(encodeEnd)[0];
     return charChunk.split('').map((char) => {
-      if (char === u200B) { // invisible &#8203; '​'
+      if (char === binary1) {
         return '1';
-      } else if (char === u200C) { // invisible &#8204; '‌'
+      } else if (char === binary0) {
         return '0';
       } else {
         return '';
@@ -187,13 +234,13 @@ var binaryToZeroWidth = function(binaryTextArray) {
     var binaryTextResult = binaryChar.split('').map((binaryNum) => {
       var num = parseInt(binaryNum, 10);
       if (num === 1) {
-        return u200B; // invisible &#8203;
+        return binary1;
       } else if (num === 0) {
-        return u200C; // invisible &#8204;
+        return binary0;
       }
       return '';
     }).join('');
-    return u200D + binaryTextResult + uFEFF;
+    return encodeStart + binaryTextResult + encodeEnd;
   });
 };
 
@@ -204,7 +251,7 @@ var interlaceLetters = function(baseString, interweaveStringArray) {
   var result = [];
 
   if (interweaveStringArray.length < useableBase.length) {
-    var every = useableBase.length / interweaveStringArray.length;
+    var every = Math.round(useableBase.length / interweaveStringArray.length);
     for (var i = 0, len = useableBase.length, interW = 0; i < len; i += every, interW++) {
       result.push(useableBase.substr(i, every));
       result.push(interweaveStringArray[interW]);
