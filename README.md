@@ -4,7 +4,7 @@
 This plugin allows you to hide text inside other text, without it appearing that there's anything different about it.
 
 ## Chrome Store
-You can find it here: https://chrome.google.com/webstore/detail/mjbadipfgkbceacghfcacpiekejpbpfb/publish-accepted
+You can find it here: https://chrome.google.com/webstore/detail/mjbadipfgkbceacghfcacpiekejpbpfb
 
 ## Encoding
 Place the text you want to hide the message in into the Input Text field (Plain Text), then place the text you want to hide into the Secret Text field, and click Encode.
